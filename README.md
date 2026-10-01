@@ -52,6 +52,12 @@ python3 api.py --host 127.0.0.1 --port 8008
 
 完整文档见 [`api.md`](api.md)（也作为文档站 `/docs.html` 的内容源）。
 
+## 解密原理
+
+`lib.so` 是「外层 AES-CBC 容器 + 内层成员」两层结构：外层密钥由 `slky`（自定义哈希）从包信息推导，内层每个成员用 `文件名 + sok/dek` 派生标记与密钥独立解密。支持三种算法族：`current`（现代）、`legacy4`（远古）、`transitional`（过渡期 mete，未攻克）。
+
+详见 **[`ALGORITHM.md`](ALGORITHM.md)**（密码学原语 / 三种算法族 / 密钥提取 / 参数来源）。
+
 ## 项目结构
 
 ```
