@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>动态库提取 - iApp Decrypt</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+<body>
+
+<div class="main">
+    <div class="header">
+        <h1>iApp Decrypt</h1>
+        <div class="header-links">
+            <a class="header-link" href="index.html">解密</a>
+            <a class="header-link" href="repair.html">动态加密修复</a>
+            <a class="header-link" href="docs.html">API 文档</a>
+            <a class="header-link" href="https://qm.qq.com/q/ix1x90IURa" target="_blank">添加交流群</a>
+        </div>
+
+    </div>
+
+    <div class="lib-tool active" id="libTool">
+        <div class="api-section">
+            <h3>动态库提取</h3>
+            <div class="api-desc">上传 lib.zip，扫描其中所有 libygsiyu.so，并提取每个动态库的 post_key / xor_key。</div>
+        </div>
+
+        <form id="libExtractForm">
+            <div class="file-zone" id="libZipZone">
+                <input type="file" name="libzip" accept=".zip,.apk" required>
+                <div class="icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 8v13H3V8"/>
+                        <path d="M1 3h22v5H1z"/>
+                        <path d="M10 12h4"/>
+                    </svg>
+                </div>
+                <div class="label">点击或拖拽上传 lib.zip</div>
+                <div class="filename" id="libZipLabel"></div>
+                <div style="margin-top:8px;font-size:11px;color:var(--text3);">会扫描压缩包中所有 libygsiyu.so 并返回 key</div>
+            </div>
+            <div class="upload-progress" id="libExtractUploadProgress">
+                <div class="upload-progress-bar"><div class="upload-progress-fill"></div></div>
+                <div class="upload-progress-text">上传进度 0%</div>
+            </div>
+            <button type="submit" class="submit-btn" id="libExtractBtn">提取动态库 Key</button>
+            <div class="error-msg" id="libExtractError"></div>
+        </form>
+        <div class="tool-result" id="libExtractResult"></div>
+    </div>
+</div>
+
+
+<div class="toast" id="toast">已复制到剪贴板</div>
+<script src="js/common.js"></script>
+<script src="js/libs.js"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>动态加密修复 - iApp Decrypt</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+<body>
+
+<div class="main">
+    <div class="header">
+        <h1>iApp Decrypt</h1>
+        <div class="header-links">
+            <a class="header-link" href="index.html">解密</a>
+            <a class="header-link" href="libs.html">动态库提取</a>
+            <a class="header-link" href="docs.html">API 文档</a>
+            <a class="header-link" href="https://qm.qq.com/q/ix1x90IURa" target="_blank">添加交流群</a>
+        </div>
+
+    </div>
+
+    <div class="lib-tool active" id="repairTool">
+        <div class="api-section">
+            <h3>动态加密修复</h3>
+            <div class="api-desc">上传包含多个 `classes*.dex` 的 zip/apk 和待修复源码 zip，自动特征扫描提取映射并批量修复源码，返回可下载的修复后 ZIP。</div>
+        </div>
+
+        <form id="repairForm">
+            <div class="file-zone" id="repairDexZone">
+                <input type="file" name="dexzip" accept=".zip,.apk,.dex" required>
+                <div class="icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <path d="M9 13h6"/>
+                        <path d="M9 17h6"/>
+                    </svg>
+                </div>
+                <div class="label">点击或拖拽上传 dex.zip / apk</div>
+                <div class="filename" id="repairDexLabel"></div>
+                <div style="margin-top:8px;font-size:11px;color:var(--text3);">会自动扫描其中所有 classes*.dex，并自动从可用 dex 特征扫描提取映射</div>
+            </div>
+
+            <div class="file-zone" id="repairSrcZipZone" style="margin-top:18px;">
+                <input type="file" name="srczip" accept=".zip" required>
+                <div class="icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 8v13H3V8"/>
+                        <path d="M1 3h22v5H1z"/>
+                        <path d="M10 12h4"/>
+                    </svg>
+                </div>
+                <div class="label">点击或拖拽上传源码 zip</div>
+                <div class="filename" id="repairSrcZipLabel"></div>
+                <div style="margin-top:8px;font-size:11px;color:var(--text3);">支持批量修复 `.iyu/.myu/.mjava/.mjs/.ilua/.ijs` 等源码文件</div>
+            </div>
+
+            <div class="upload-progress" id="repairUploadProgress">
+                <div class="upload-progress-bar"><div class="upload-progress-fill"></div></div>
+                <div class="upload-progress-text">上传进度 0%</div>
+            </div>
+            <button type="submit" class="submit-btn" id="repairBtn">开始修复源码</button>
+            <div class="error-msg" id="repairError"></div>
+        </form>
+        <div class="tool-result" id="repairResult"></div>
+    </div>
+</div>
+
+
+<div class="toast" id="toast">已复制到剪贴板</div>
+<script src="js/common.js"></script>
+<script src="js/repair.js"></script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>iApp Decrypt</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+<body>
+
+<div class="main">
+    <div class="header">
+        <h1>iApp Decrypt</h1>
+        <div class="header-links">
+            <a class="header-link" href="libs.html">动态库提取</a>
+            <a class="header-link" href="repair.html">动态加密修复</a>
+            <a class="header-link" href="docs.html">API 文档</a>
+            <a class="header-link" href="https://qm.qq.com/q/ix1x90IURa" target="_blank">添加交流群</a>
+        </div>
+        <div class="header-toggles">
+            <div class="toggle-switch" id="autoExtractToggle" onclick="handleAutoExtractClick()">
+                <span class="label">自动提取</span>
+                <span class="switch"></span>
+            </div>
+            <div class="toggle-switch active" id="cacheToggle" onclick="handleCacheToggleClick()">
+                <span class="label">缓存命中</span>
+                <span class="switch"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-wrap" id="formWrap">
+        <form id="decryptForm">
+            <div class="file-zone" id="apkZone" style="display:none;">
+                <input type="file" name="apk" accept=".apk">
+                <div class="icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+                <div class="label">点击或拖拽上传 APK 文件</div>
+                <div class="filename" id="apkLabel"></div>
+                <div style="margin-top:8px;font-size:11px;color:var(--text3);">上传后将自动提取参数并填入下方表单</div>
+            </div>
+            <div class="upload-progress" id="apkExtractProgress">
+                <div class="upload-progress-bar"><div class="upload-progress-fill"></div></div>
+                <div class="upload-progress-text">上传进度 0%</div>
+            </div>
+            
+            <div id="manualFields">
+                <div class="field">
+                    <label>打包版本</label>
+                    <select id="packageMode" name="package_mode">
+                        <option value="current">最新(当前版本)</option>
+                        <option value="legacy4">远古(So密钥为4位)</option>
+                    </select>
+                    <div class="field-hint" id="packageModeHint">选择版本只影响手动输入参数；自动提取始终按参数自动判断版本。</div>
+                </div>
+                <div class="field">
+                    <label>package_name</label>
+                    <input type="text" name="package_name" placeholder="com.iapp.example" required>
+                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <label>version_name</label>
+                        <input type="text" name="version_name" placeholder="1.0" required>
+                    </div>
+                    <div class="field">
+                        <label>version_code</label>
+                        <input type="text" name="version_code" placeholder="100001" required>
+                    </div>
+                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <label>app_name</label>
+                        <input type="text" name="app_name" placeholder="MyApp" required>
+                    </div>
+                    <div class="field">
+                        <label>entry_file</label>
+                        <input type="text" name="entry_file" placeholder="mian.iyu" value="mian.iyu">
+                    </div>
+                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <label>sok</label>
+                        <input type="text" name="sok" placeholder="so密钥" required>
+                    </div>
+                    <div class="field">
+                        <label>dek</label>
+                        <input type="text" name="dek" placeholder="dex密钥" required>
+                    </div>
+                </div>
+                <div class="field-row" id="legacySignRow">
+                    <div class="field">
+                        <label>sign_key</label>
+                        <input type="text" name="sign_key" placeholder="APK签名MD5或最终signKey">
+                    </div>
+                    <div class="field">
+                        <label>pwd_key</label>
+                        <input type="text" name="pwd_key" placeholder="留空默认不启用">
+                    </div>
+                </div>
+                <div class="field-row" id="postKeyRow">
+                    <div class="field">
+                        <label>post_key</label>
+                        <input type="text" name="post_key" placeholder="留空默认 e25f487325c6e711807c46c3e31d3c973c771e01">
+                    </div>
+                    <div class="field">
+                        <label>xor_key</label>
+                        <input type="text" name="xor_key" placeholder="留空默认 e24825e78046e33c3c1e251d4e0555e169a818ca">
+                    </div>
+                </div>
+                <div class="field-row" id="signB64Row">
+                    <div class="field">
+                        <label>sign_b64</label>
+                        <input type="text" name="sign_b64" placeholder="APK签名证书Base64（extra_conf1g.xml为空时需要，可留空自动提取）">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="file-zone" id="fileZone">
+                <input type="file" name="libso" accept=".so" required>
+                <div class="icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                </div>
+                <div class="label">点击或拖拽上传 lib.so</div>
+                <div class="filename" id="fileLabel"></div>
+            </div>
+            <div class="upload-progress" id="decryptUploadProgress">
+                <div class="upload-progress-bar"><div class="upload-progress-fill"></div></div>
+                <div class="upload-progress-text">上传进度 0%</div>
+            </div>
+            <button type="submit" class="submit-btn" id="submitBtn">解密</button>
+            <div class="error-msg" id="errorMsg"></div>
+        </form>
+    </div>
+
+        <div class="result-wrap" id="resultWrap"></div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" style="display:none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>自动提取参数</h3>
+            <button class="modal-close" onclick="closeAutoExtractModal()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="warning-box">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d4915a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 9v2m0 4h.01"></path>
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"></path>
+                </svg>
+                <div class="warning-text">
+                    <p><strong>注意事项：</strong></p>
+                    <ul>
+                        <li>大文件APK提取可能需要较长时间，请耐心等待</li>
+                        <li>被加密或修改过的安装包可能无法有效提取参数</li>
+                        <li>本工具只能解密由 iApp v3 打包的APK文件</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn modal-btn-cancel" onclick="closeAutoExtractModal()">取消</button>
+            <button class="modal-btn modal-btn-confirm" onclick="confirmAutoExtract()">确认开启</button>
+        </div>
+    </div>
+</div>
+<div class="toast" id="toast">已复制到剪贴板</div>
+<script src="js/common.js"></script>
+<script src="js/decrypt.js"></script>
+</body>
+</html>
