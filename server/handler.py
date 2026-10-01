@@ -391,6 +391,10 @@ class DecryptHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", mime_type)
             self.send_header("Content-Length", str(len(content)))
+            # 静态资源禁止缓存：前端经常热更，避免 Cloudflare/浏览器缓存旧版
+            self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+            self.send_header("Pragma", "no-cache")
+            self.send_header("Expires", "0")
             self.end_headers()
             self.wfile.write(content)
             # 简单控制台日志（不写入 logs.json）
