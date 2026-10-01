@@ -270,7 +270,7 @@ function applyManualModeUI(mode) {
     postKeyInput.disabled = legacy4;
     xorKeyInput.disabled = legacy4;
     signKeyInput.disabled = !legacy4;
-    pwdKeyInput.disabled = !legacy4;
+    // pwd_key 是 current 与 legacy4 通用字段，始终可用
     if (signB64Input) signB64Input.disabled = legacy4;
 
     if (legacy4) {
