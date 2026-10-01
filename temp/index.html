@@ -93,12 +93,6 @@
                         <input type="text" name="dek" placeholder="dex密钥" required>
                     </div>
                 </div>
-                <div class="field-row" id="pwdKeyRow">
-                    <div class="field">
-                        <label>密码 (pwd_key)</label>
-                        <input type="text" name="pwd_key" placeholder="用户加密密码（原始密码），留空不启用">
-                    </div>
-                </div>
                 <div class="field-row" id="legacySignRow">
                     <div class="field">
                         <label>sign_key</label>
@@ -116,6 +110,10 @@
                     </div>
                 </div>
                 <div class="field-row" id="signB64Row">
+                    <div class="field">
+                        <label>密码 (pwd_key)</label>
+                        <input type="text" name="pwd_key" placeholder="用户加密密码（原始密码），留空不启用">
+                    </div>
                     <div class="field">
                         <label>sign_b64</label>
                         <input type="text" name="sign_b64" placeholder="APK签名证书Base64（extra_conf1g.xml为空时需要，可留空自动提取）">

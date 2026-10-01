@@ -266,11 +266,11 @@ function applyManualModeUI(mode) {
     select.value = legacy4 ? 'legacy4' : 'current';
     postKeyRow.style.display = legacy4 ? 'none' : 'grid';
     legacySignRow.style.display = legacy4 ? 'grid' : 'none';
-    if (signB64Row) signB64Row.style.display = legacy4 ? 'none' : 'grid';
+    // signB64Row 含 pwd_key（通用）+ sign_b64（current），始终显示
+    if (signB64Row) signB64Row.style.display = 'grid';
     postKeyInput.disabled = legacy4;
     xorKeyInput.disabled = legacy4;
     signKeyInput.disabled = !legacy4;
-    // pwd_key 是 current 与 legacy4 通用字段，始终可用
     if (signB64Input) signB64Input.disabled = legacy4;
 
     if (legacy4) {
