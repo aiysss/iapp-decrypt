@@ -40,6 +40,8 @@ def decrypt_bundle_current(
             trace["outer_key"] = outer_key
             trace["resolved_sok"] = config.sok.encode("utf-8")
             trace["resolved_dek"] = config.dek.encode("utf-8")
+            trace["pwd_input"] = config.pwd_key.encode("utf-8")
+            trace["pwd_key"] = config.user_enc.encode("utf-8")
             trace["candidate_count"] = str(len(candidates)).encode("ascii")
             trace["key_set_count"] = str(len(key_sets)).encode("ascii")
             trace["tried_count"] = str(tried).encode("ascii")
