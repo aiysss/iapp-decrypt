@@ -178,7 +178,7 @@ multipart 方式直接传 `libso` 文件；JSON 方式传 `libso_token`。
 | `sok` | string | 否 | so 密钥 |
 | `sign_key` | string | 否 | 签名 md5 |
 | `sign_b64` | string | 否 | 签名 base64 |
-| `pwd_key` | string | 否 | 密码密钥 |
+| `pwd_key` | string | 否 | 用户加密密码（原始密码，如 `1314521`）。服务端自动算 `MD5(密码 + "mmpfbf")` 作为 user_enc 参与密钥派生 |
 | `post_key` | string | 否 | 手动 post_key（hex） |
 | `xor_key` | string | 否 | 手动 xor_key（hex） |
 | `entry_file` | string | 否 | 入口文件名，默认 `mian.iyu` |

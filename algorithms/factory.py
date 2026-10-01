@@ -2,8 +2,17 @@
 from __future__ import annotations
 from typing import List, Optional, Tuple
 
-from config import BURDEN_XOR_KEY, MAGIC_BYTES
-from crypto.elf import extract_key_candidates_from_so, uniq_bytes_list
+from config import (
+    BURDEN_XOR_KEY,
+    K_SLKY_NEW,
+    K_SLKY_OLD,
+    K_SLKY_V2,
+    K_XOR_NEW,
+    K_XOR_V2,
+    MAGIC_BYTES,
+    MAGIC_STRING,
+)
+from crypto.elf import extract_key_candidates_from_so
 
 from algorithms.common import KeySet, OuterCandidate
 from algorithms.current import (
@@ -14,39 +23,63 @@ from algorithms.current import (
 )
 from algorithms.transitional import TransitionalOuterCandidate
 
+def detect_version(so_data: Optional[bytes]) -> Optional[str]:
+    """检测引擎版本：new2 / new / old / mete / v4。"""
+    if not so_data:
+        return None
+    if b"_ZN4iapp4mete" in so_data:
+        return "mete"
+    if b"NSt3__1" in so_data:
+        return "old"
+    if b"NSt6__ndk11" in so_data:
+        if K_XOR_V2[:8] in so_data or K_SLKY_V2[:4] in so_data:
+            return "new2"
+        return "new"
+    return None
+
+
+_VERSION_KEYS = {
+    "new2": (K_SLKY_V2, K_XOR_V2),
+    "new": (K_SLKY_NEW, K_XOR_NEW),
+    "old": (K_SLKY_OLD, BURDEN_XOR_KEY),
+}
+
+
 def generate_key_sets(
     native_so: Optional[bytes] = None,
     manual_post_key: Optional[bytes] = None,
     manual_xor_key: Optional[bytes] = None,
 ) -> List[KeySet]:
-    post_candidates = [MAGIC_BYTES]
-    xor_candidates = [BURDEN_XOR_KEY]
-    if manual_post_key:
-        post_candidates = [manual_post_key] + post_candidates
-    if manual_xor_key:
-        xor_candidates = [manual_xor_key] + xor_candidates
-    if native_so:
-        so_post_candidates, so_xor_candidates = extract_key_candidates_from_so(native_so)
-        post_candidates = so_post_candidates + post_candidates
-        xor_candidates = so_xor_candidates + xor_candidates
-
-    post_candidates = uniq_bytes_list(post_candidates)[:8]
-    xor_candidates = uniq_bytes_list(xor_candidates)[:8]
-
     out: List[KeySet] = []
     seen = set()
-    for pi, post_key in enumerate(post_candidates):
-        for xi, xor_key in enumerate(xor_candidates):
-            sig = (post_key, xor_key)
-            if sig in seen:
-                continue
-            seen.add(sig)
-            name = "generic"
-            if post_key != MAGIC_BYTES or xor_key != BURDEN_XOR_KEY:
-                name = f"post[{pi}]/xor[{xi}]"
-            out.append(KeySet(name, post_key, xor_key))
-            if len(out) >= 20:
-                return out
+
+    def add(name: str, pk: bytes, xk: bytes) -> None:
+        if (pk, xk) not in seen:
+            seen.add((pk, xk))
+            out.append(KeySet(name, pk, xk))
+
+    # 1. 引擎版本密钥对（快速路径，公共库）
+    ver = detect_version(native_so)
+    if ver in _VERSION_KEYS:
+        pk, xk = _VERSION_KEYS[ver]
+        add(f"public/{ver}", pk, xk)
+
+    # 2. 手动密钥（优先）
+    if manual_post_key and manual_xor_key:
+        add("manual", manual_post_key, manual_xor_key)
+
+    # 3. 动态提取密钥（自定义库，全组合兜底）
+    if native_so:
+        so_post, so_xor = extract_key_candidates_from_so(native_so)
+        for pk in so_post:
+            for xk in so_xor:
+                add("extracted", pk, xk)
+
+    # 4. 其它公共密钥组合（兜底）
+    for pk in (MAGIC_BYTES, MAGIC_STRING, K_SLKY_OLD, K_SLKY_NEW, K_SLKY_V2):
+        for xk in (BURDEN_XOR_KEY, K_XOR_NEW, K_XOR_V2):
+            add("public", pk, xk)
+
     return out
 
 def generate_outer_candidates(mode: str = "auto", has_signature: bool = False) -> List[OuterCandidate]:

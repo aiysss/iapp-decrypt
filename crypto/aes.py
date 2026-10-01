@@ -16,12 +16,12 @@ def aes_cbc_decrypt(ciphertext: bytes, key: bytes) -> bytes:
 
 def pkcs5_unpad(data: bytes) -> bytes:
     if not data:
-        raise ValueError("invalid PKCS5 padding: empty buffer")
+        return data
     pad_len = data[-1]
     if pad_len == 0 or pad_len > 16:
-        raise ValueError(f"invalid PKCS5 padding length: {pad_len}")
+        return data
     if data[-pad_len:] != bytes([pad_len]) * pad_len:
-        raise ValueError("invalid PKCS5 padding bytes")
+        return data
     return data[:-pad_len]
 
 

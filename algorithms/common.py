@@ -15,6 +15,7 @@ from config import (
     MAGIC_STRING,
     REFERENCE_PATTERN,
     REFERENCE_SUFFIXES,
+    USER_PWD_SALT,
 )
 from crypto.aes import aes_cbc_then_xor_decrypt, cyclic_xor
 from crypto.slky import signed_div, signed_mod, slky, to_signed
@@ -32,6 +33,7 @@ class DecryptConfig:
     sign_key: str = ""
     sign_b64: str = ""
     pwd_key: str = ""
+    user_enc: str = ""
 
 
 @dataclass(frozen=True)
@@ -69,6 +71,12 @@ def resolve_config(config: DecryptConfig, native_so: Optional[bytes] = None) -> 
         auto_sok = extract_sok_from_so(native_so)
         if auto_sok:
             sok = auto_sok
+    pwd_key = (config.pwd_key or "").strip()
+    user_enc = (config.user_enc or "").strip()
+    # 用户加密密码：原生侧收到的是 MD5(密码 + "mmpfbf")，作为 user_enc 拼进 base 尾部。
+    # 允许两种用法：直接给 user_enc（已算好的值），或给 pwd_key（原始密码，这里算盐 MD5）。
+    if not user_enc and pwd_key:
+        user_enc = md5_hex(pwd_key + USER_PWD_SALT)
     resolved = DecryptConfig(
         package_name=(config.package_name or "").strip(),
         version_name=(config.version_name or "").strip(),
@@ -79,7 +87,8 @@ def resolve_config(config: DecryptConfig, native_so: Optional[bytes] = None) -> 
         entry_file=normalize_member_name(config.entry_file or "mian.iyu"),
         sign_key=(config.sign_key or "").strip(),
         sign_b64=(config.sign_b64 or "").strip(),
-        pwd_key=(config.pwd_key or "").strip(),
+        pwd_key=pwd_key,
+        user_enc=user_enc,
     )
     missing = []
     for field_name in ("package_name", "version_name", "version_code", "app_name", "sok", "dek"):
@@ -125,7 +134,7 @@ def build_outer_env(config: DecryptConfig) -> Dict[str, bytes]:
     except Exception:
         env["signature"] = b""
     env["entry_file"] = normalize_member_name(config.entry_file).encode("utf-8")
-    env["base"] = env["sok"] + env["version_name"] + env["package_name"] + env["app_name"] + env["version_code"] + env["dek"]
+    env["base"] = env["sok"] + env["version_name"] + env["package_name"] + env["app_name"] + env["version_code"] + env["dek"] + config.user_enc.encode("utf-8")
     env["base_tail"] = env["version_name"] + env["package_name"] + env["app_name"] + env["version_code"] + env["dek"]
     env["sok_dek"] = env["sok"] + env["dek"]
     env["dek_sok"] = env["dek"] + env["sok"]
