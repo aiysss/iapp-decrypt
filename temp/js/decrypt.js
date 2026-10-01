@@ -34,6 +34,13 @@ function confirmAutoExtract() {
         document.querySelectorAll('#manualFields input[required]').forEach(input => {
             input.removeAttribute('required');
         });
+        // 密码是用户私密输入，自动提取填不了，保持可编辑
+        const pwdKeyInput = document.querySelector('input[name="pwd_key"]');
+        if (pwdKeyInput) {
+            const pwdField = pwdKeyInput.closest('.field');
+            if (pwdField) pwdField.style.opacity = '1';
+            pwdKeyInput.style.pointerEvents = 'auto';
+        }
     } else {
         label.textContent = '自动提取';
         apkZone.style.display = 'none';
@@ -281,7 +288,6 @@ function applyManualModeUI(mode) {
         return;
     }
 
-    pwdKeyInput.value = '';
     sokInput.placeholder = 'so密钥';
     hint.textContent = '选择版本只影响手动输入参数；自动提取始终按参数自动判断版本。';
 }
