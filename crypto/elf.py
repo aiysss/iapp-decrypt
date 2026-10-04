@@ -735,7 +735,7 @@ def arm32_rodata_refs(elf: "MiniELF", code: bytes, base: int) -> List[Tuple[int,
             continue
         pval = struct.unpack_from("<I", elf.data, poff)[0]
         found = None
-        for k in range(step, min(step + 16, n - 1), 2):
+        for k in range(step, min(step + 16, n - 1 - i), 2):
             h2 = struct.unpack_from("<H", code, i + k)[0]
             if (h2 & 0xFF78) == 0x4478 and (h2 & 7) == rn:
                 found = i + k
